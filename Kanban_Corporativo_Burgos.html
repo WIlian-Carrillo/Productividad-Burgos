@@ -1,0 +1,957 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Control Operativo | Corporativo Burgos</title>
+  <style>
+    :root{--navy:#10243f;--navy2:#17385e;--blue:#3b8ae8;--blue2:#eaf3ff;--bg:#f4f7fb;--card:#fff;--text:#172233;--muted:#6b778c;--line:#dde5ef;--green:#20a36b;--amber:#e7a523;--red:#d84c4c;--purple:#7457d9;--shadow:0 8px 28px rgba(16,36,63,.08)}
+    *{box-sizing:border-box} body{margin:0;font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    button,input,select,textarea{font:inherit} button{cursor:pointer}
+
+    /* ── LOGIN ── */
+    #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,var(--navy) 0%,#1a3a6b 100%)}
+    .login-card{background:#fff;border-radius:20px;padding:42px 44px;width:min(420px,calc(100vw - 32px));box-shadow:0 30px 80px rgba(0,0,0,.35)}
+    .login-logo{width:52px;height:52px;border-radius:14px;background:var(--blue);display:grid;place-items:center;font-weight:900;font-size:22px;color:#fff;box-shadow:0 8px 20px rgba(59,138,232,.4);margin-bottom:20px}
+    .login-card h1{font-size:22px;margin:0 0 4px}
+    .login-card p{color:var(--muted);margin:0 0 28px;font-size:13px}
+    .login-field{display:grid;gap:6px;margin-bottom:16px}
+    .login-field label{font-size:12px;font-weight:700;color:var(--text)}
+    .login-field input{border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;width:100%;outline:none;transition:border .15s}
+    .login-field input:focus{border-color:var(--blue)}
+    .login-btn{width:100%;background:var(--blue);color:#fff;border:0;border-radius:10px;padding:13px;font-size:15px;font-weight:700;margin-top:8px;transition:opacity .15s}
+    .login-btn:hover{opacity:.88}
+    .login-err{color:var(--red);font-size:12px;margin-top:10px;min-height:18px;text-align:center}
+    .login-foot{color:#94a7bd;font-size:11px;text-align:center;margin-top:22px}
+
+    /* ── APP ── */
+    .app{min-height:100vh;display:grid;grid-template-columns:240px 1fr}
+    aside{background:linear-gradient(180deg,var(--navy),#0b192c);color:#fff;padding:24px 16px;position:sticky;top:0;height:100vh;z-index:10;overflow-y:auto}
+    .brand{display:flex;gap:12px;align-items:center;padding:0 8px 22px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:16px}
+    .logo{width:40px;height:40px;border-radius:12px;background:var(--blue);display:grid;place-items:center;font-weight:900;font-size:18px;box-shadow:0 8px 20px rgba(59,138,232,.3);flex-shrink:0}
+    .brand small{display:block;color:#aebed1;font-size:11px}.brand strong{font-size:14px}
+    .user-badge{background:rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+    .user-avatar{width:32px;height:32px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font-weight:800;font-size:13px;flex-shrink:0}
+    .user-info small{display:block;color:#94a7bd;font-size:10px}.user-info strong{font-size:12px}
+    .admin-badge{display:inline-block;background:rgba(231,165,35,.2);color:#f5c842;font-size:10px;font-weight:700;border-radius:4px;padding:1px 5px;margin-left:4px}
+    .nav{display:grid;gap:5px}
+    .nav button{border:0;background:transparent;color:#c9d5e4;padding:11px 12px;border-radius:10px;text-align:left;display:flex;align-items:center;gap:10px;transition:background .12s}
+    .nav button:hover,.nav button.active{background:rgba(255,255,255,.1);color:#fff}
+    .nav .ico{font-size:16px;width:20px;text-align:center}
+    .aside-foot{position:sticky;bottom:0;background:linear-gradient(0deg,#0b192c,transparent);padding-top:16px;margin-top:auto}
+    .logout-btn{border:1px solid rgba(255,255,255,.15);background:transparent;color:#c9d5e4;width:100%;padding:9px;border-radius:9px;display:flex;align-items:center;gap:8px;font-size:12px;transition:background .12s}
+    .logout-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+
+    main{min-width:0;padding:0 28px 40px}
+    .topbar{height:78px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .topbar h1{font-size:23px;margin:0}.topbar p{margin:2px 0 0;color:var(--muted)}
+    .actions{display:flex;gap:8px;align-items:center}
+    .btn{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:9px;padding:9px 13px;font-weight:650}
+    .btn:hover{border-color:#b9c9dc}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+    .btn.danger{color:var(--red)}.btn.sm{padding:6px 9px;font-size:12px}.hamb{display:none}
+    .view{display:none}.view.active{display:block}
+
+    /* ── KPI ── */
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin-bottom:18px}
+    .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:var(--shadow)}
+    .kpi .label{color:var(--muted);font-size:12px}.kpi .value{font-size:27px;font-weight:800;margin-top:5px;letter-spacing:-.5px}
+    .kpi .sub{font-size:11px;color:var(--muted);margin-top:3px}
+    .value.good{color:var(--green)}.value.warn{color:var(--amber)}.value.bad{color:var(--red)}
+
+    /* ── LAYOUT ── */
+    .grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    .panel h2{font-size:16px;margin:0}.hint{color:var(--muted);font-size:12px}
+    .progress{height:9px;background:#e8edf4;border-radius:99px;overflow:hidden}
+    .progress i{height:100%;display:block;background:linear-gradient(90deg,var(--blue),#63b3ff);border-radius:99px}
+    .row{display:flex;justify-content:space-between;align-items:center;gap:10px}.mt8{margin-top:8px}.mt14{margin-top:14px}
+
+    table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid #edf1f6;font-size:12px}
+    th{color:var(--muted);font-weight:650}
+    .pill{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:4px 8px;font-size:11px;font-weight:700;background:#eef3f8;color:#42536a}
+    .pill.green{background:#e7f7f0;color:#16734d}.pill.red{background:#fcebec;color:#ad343b}
+    .pill.amber{background:#fff5dc;color:#8e6500}.pill.blue{background:var(--blue2);color:#2368b6}.pill.purple{background:#f0ecff;color:#5f43bd}
+    .bars{display:grid;gap:12px}
+    .bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+    .bar{height:8px;background:#edf1f6;border-radius:10px}.bar span{display:block;height:100%;border-radius:10px;background:var(--blue)}
+
+    /* ── KANBAN ── */
+    .toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+    .toolbar select,.toolbar input{border:1px solid var(--line);border-radius:9px;padding:9px 10px;background:#fff;color:var(--text)}
+    .toolbar input{min-width:210px}
+    .segmented{display:flex;background:#e9eef5;padding:3px;border-radius:10px}
+    .segmented button{border:0;background:transparent;padding:7px 10px;border-radius:7px;color:var(--muted);font-size:12px}
+    .segmented button.active{background:#fff;color:var(--navy);box-shadow:0 2px 7px rgba(0,0,0,.08);font-weight:700}
+    .board-wrap{overflow-x:auto;padding-bottom:12px}
+    .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:12px;min-width:max-content}
+    .column{background:#eaf0f6;border-radius:13px;padding:11px;min-height:520px;border:1px solid #dde6ef}
+    .col-head{display:flex;justify-content:space-between;align-items:center;padding:3px 4px 11px;font-weight:800}
+    .count{background:#fff;border:1px solid var(--line);padding:2px 7px;border-radius:99px;font-size:11px;color:var(--muted)}
+    .dropzone{min-height:450px}.dropzone.over{outline:2px dashed var(--blue);outline-offset:2px;border-radius:9px}
+    .task{background:#fff;border:1px solid #dbe3ed;border-radius:11px;padding:12px;margin-bottom:9px;box-shadow:0 3px 12px rgba(16,36,63,.055);cursor:grab;position:relative}
+    .task:hover{border-color:#b8cbe0}.task.dragging{opacity:.45}
+    .task h3{font-size:13px;margin:8px 0 7px;line-height:1.35}
+    .task .meta{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px}
+    .task .tags{display:flex;gap:5px;flex-wrap:wrap}.task .overdue{color:var(--red);font-weight:700}
+    .task .task-menu{border:0;background:transparent;color:var(--muted);position:absolute;right:7px;top:6px;padding:3px 6px;font-weight:900}
+    .task-owner-badge{position:absolute;left:10px;top:8px;font-size:10px;color:var(--blue);font-weight:700}
+
+    /* ── MATRIX ── */
+    .matrix{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .quad{border:1px solid var(--line);border-radius:14px;padding:14px;min-height:210px;background:#fff}
+    .quad h3{margin:0 0 3px;font-size:15px}.quad p{margin:0 0 10px;color:var(--muted);font-size:11px}
+    .quad.q1{border-top:4px solid var(--red)}.quad.q2{border-top:4px solid var(--blue)}
+    .quad.q3{border-top:4px solid var(--amber)}.quad.q4{border-top:4px solid #9ba7b5}
+    .mini-task{border:1px solid #e3e9f0;background:#f9fbfd;border-radius:9px;padding:9px;margin:7px 0;font-size:12px}
+    .mini-task strong{display:block}.mini-task span{color:var(--muted);font-size:11px}
+
+    /* ── MEETING ── */
+    .agenda{display:grid;grid-template-columns:65px 1fr;gap:0}
+    .agenda-time{color:var(--blue);font-weight:800;padding:13px 0;border-bottom:1px solid var(--line)}
+    .agenda-item{padding:13px 0;border-bottom:1px solid var(--line)}
+    .agenda-item strong{display:block}.agenda-item span{color:var(--muted);font-size:12px}
+    .meeting-summary{border-radius:12px;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px}
+    .meeting-summary .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}
+    .meeting-summary .stats div{background:rgba(255,255,255,.09);border-radius:9px;padding:10px}
+    .meeting-summary small{display:block;color:#bfd0e4}.meeting-summary b{font-size:20px}
+    .wilson{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .step{border-radius:12px;padding:14px;border:1px solid var(--line);background:#fff}
+    .step b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--blue2);color:var(--blue);margin-bottom:8px}
+    .step strong{display:block}.step span{font-size:11px;color:var(--muted)}
+
+    /* ── PDCA ── */
+    .pdca-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .pdca-stage{border:1px solid var(--line);border-radius:12px;padding:13px;background:#f9fbfd;min-height:130px}
+    .pdca-stage h3{margin:0 0 8px;color:var(--blue);font-size:13px}
+    .pdca-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px;margin-bottom:7px}
+
+    /* ── SETTINGS ── */
+    .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .field{display:grid;gap:6px;margin-bottom:12px}.field label{font-size:12px;font-weight:700}
+    .field input,.field select,.field textarea{border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;width:100%}
+    .field textarea{min-height:74px;resize:vertical}
+    .muted{color:var(--muted)}
+    .empty{color:#8b98a9;text-align:center;padding:28px 8px;font-size:12px}
+    .notice{background:#eef6ff;border:1px solid #cfe4ff;color:#255d98;border-radius:11px;padding:12px 14px;margin-bottom:14px}
+
+    /* ── ADMIN USER MGMT ── */
+    .user-table-wrap{overflow-x:auto}
+    .user-row{display:grid;grid-template-columns:1fr 1fr 120px 90px;gap:8px;align-items:center;padding:10px 8px;border-bottom:1px solid #edf1f6;font-size:12px}
+    .user-row.header{color:var(--muted);font-weight:650;font-size:11px}
+
+    /* ── MODAL ── */
+    dialog{border:0;border-radius:16px;padding:0;width:min(680px,calc(100vw - 28px));box-shadow:0 25px 80px rgba(10,25,45,.25)}
+    dialog::backdrop{background:rgba(10,23,40,.52);backdrop-filter:blur(2px)}
+    .modal-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+    .modal-head h2{font-size:17px;margin:0}.modal-body{padding:18px 20px;max-height:70vh;overflow:auto}
+    .modal-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.span2{grid-column:1/-1}
+    .close{background:transparent;border:0;font-size:20px;color:var(--muted)}
+    .toast{position:fixed;right:22px;bottom:22px;background:var(--navy);color:#fff;padding:11px 15px;border-radius:9px;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s;z-index:999}
+    .toast.show{opacity:1;transform:none}
+
+    @media(max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}.wilson,.pdca-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:760px){
+      .app{grid-template-columns:1fr}
+      aside{position:fixed;transform:translateX(-100%);transition:.2s;width:245px;box-shadow:20px 0 50px rgba(0,0,0,.25)}
+      aside.open{transform:none}main{padding:0 14px 30px}.hamb{display:inline-flex}
+      .topbar{height:auto;padding:15px 0}.topbar h1{font-size:18px}.topbar p{display:none}
+      .actions .desktop{display:none}.kpis{grid-template-columns:1fr 1fr;gap:9px}.kpi{padding:13px}
+      .kpi .value{font-size:22px}.matrix,.settings-grid{grid-template-columns:1fr}
+      .wilson,.pdca-grid{grid-template-columns:1fr}.meeting-summary .stats{grid-template-columns:1fr 1fr}
+      .form-grid{grid-template-columns:1fr}.span2{grid-column:auto}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ LOGIN ═══════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">CO</div>
+    <h1>Control Operativo</h1>
+    <p>Corporativo Burgos · Área de Tecnología e Innovación</p>
+    <div class="login-field"><label>Usuario</label><input id="loginUser" placeholder="Tu nombre de usuario" autocomplete="username"></div>
+    <div class="login-field"><label>Contraseña</label><input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="login-btn" id="loginBtn">Ingresar al sistema</button>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-foot">Acceso restringido · Corporativo Burgos</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ APP ═════════ -->
+<div class="app" id="appShell" style="display:none">
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="logo">CO</div>
+      <div><strong>Control Operativo</strong><small id="companyLabel">Corporativo Burgos</small></div>
+    </div>
+    <div class="user-badge">
+      <div class="user-avatar" id="userAvatar">W</div>
+      <div class="user-info"><strong id="userDisplayName">Wilian</strong><small id="userRoleLabel">Colaborador</small></div>
+    </div>
+    <nav class="nav">
+      <button class="active" data-view="dashboard"><span class="ico">▦</span> Panel general</button>
+      <button data-view="kanban"><span class="ico">▤</span> Kanban</button>
+      <button data-view="matrix"><span class="ico">⊞</span> Matriz semanal</button>
+      <button data-view="meeting"><span class="ico">◷</span> Junta semanal</button>
+      <button data-view="pdca"><span class="ico">↻</span> PDCA</button>
+      <button data-view="settings" id="settingsNav"><span class="ico">⚙</span> Configuración</button>
+    </nav>
+    <div class="aside-foot">
+      <button class="logout-btn" id="logoutBtn">
+        <span>⎋</span> Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div class="row">
+        <button class="btn hamb" id="menuBtn">☰</button>
+        <div><h1 id="pageTitle">Panel general</h1><p id="pageSub">Visión ejecutiva del desempeño del equipo</p></div>
+      </div>
+      <div class="actions">
+        <button class="btn desktop" id="exportBtn">Exportar respaldo</button>
+        <button class="btn primary" id="newBtn">＋ Nueva actividad</button>
+      </div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="view active">
+      <div class="kpis" id="kpis"></div>
+      <div class="grid2">
+        <div>
+          <div class="panel"><div class="panel-head"><div><h2>Cumplimiento por responsable</h2><div class="hint">ICC ponderado · todos los usuarios del equipo</div></div></div><div class="bars" id="peopleBars"></div></div>
+          <div class="panel"><div class="panel-head"><h2>Actividades que requieren atención</h2><button class="btn sm" onclick="goView('kanban')">Abrir tablero</button></div><div id="attentionTable"></div></div>
+        </div>
+        <div>
+          <div class="panel"><div class="panel-head"><h2>Avance del plan mensual</h2><span class="pill blue" id="monthLabel"></span></div><div class="row"><strong id="monthlyProgressText"></strong><span id="monthlyProgressPct"></span></div><div class="progress mt8"><i id="monthlyProgressBar"></i></div><div class="hint mt14" id="monthlyDetail"></div></div>
+          <div class="panel"><div class="panel-head"><h2>Distribución del trabajo</h2></div><div id="typeDistribution" class="bars"></div></div>
+          <div class="panel"><div class="panel-head"><h2>Semáforo por área</h2></div><div id="areaTable"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KANBAN -->
+    <section id="kanban" class="view">
+      <div class="toolbar">
+        <div class="segmented"><button class="active" data-board="simple">Vista individual</button><button data-board="flow">Flujo completo</button></div>
+        <select id="filterArea"><option value="">Todas las áreas</option></select>
+        <select id="filterPerson"><option value="">Todos los responsables</option></select>
+        <select id="filterType"><option value="">Todos los tipos</option><option>Tarea estándar</option><option>Urgencia / incidencia</option><option>Mejora</option></select>
+        <input id="searchTask" placeholder="Buscar actividad…">
+      </div>
+      <div class="notice" id="boardHelp">La vista individual resume el trabajo en Pendiente, En proceso y Terminada. Arrastra las tarjetas para cambiar su estado.</div>
+      <div class="board-wrap"><div class="board" id="board"></div></div>
+    </section>
+
+    <!-- MATRIX -->
+    <section id="matrix" class="view">
+      <div class="panel"><div class="panel-head"><div><h2>Clasificación de nuevos temas</h2><div class="hint">Úsala durante la junta semanal antes de asignar trabajo extraordinario.</div></div></div>
+        <div class="matrix" id="matrixGrid"></div>
+      </div>
+    </section>
+
+    <!-- MEETING -->
+    <section id="meeting" class="view">
+      <div class="grid2">
+        <div>
+          <div class="meeting-summary"><strong>Junta semanal de productividad y mejora</strong><div class="stats" id="meetingStats"></div></div>
+          <div class="panel mt14"><div class="panel-head"><div><h2>Agenda guiada — 45 minutos</h2><div class="hint">La junta revisa excepciones y termina con compromisos claros.</div></div><button class="btn sm" id="copyMeeting">Copiar minuta</button></div><div class="agenda" id="agenda"></div></div>
+        </div>
+        <div>
+          <div class="panel"><div class="panel-head"><h2>Escalera de retroalimentación Wilson</h2></div><div class="wilson">
+            <div class="step"><b>1</b><strong>Clarificar</strong><span>Entender hechos, objetivo y dependencias antes de evaluar.</span></div>
+            <div class="step"><b>2</b><strong>Valorar</strong><span>Reconocer objetivamente lo que sí funcionó.</span></div>
+            <div class="step"><b>3</b><strong>Inquietudes</strong><span>Señalar la desviación, riesgo o impacto sin atacar a la persona.</span></div>
+            <div class="step"><b>4</b><strong>Sugerir</strong><span>Convertir el feedback en una acción con fecha y responsable.</span></div>
+          </div></div>
+          <div class="panel"><div class="panel-head"><h2>Compromisos para revisar</h2></div><div id="commitments"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PDCA -->
+    <section id="pdca" class="view">
+      <div class="notice">Abre un PDCA cuando el problema se repita, afecte varias áreas, genere pérdidas o requiera cambiar un proceso.</div>
+      <div class="panel"><div class="panel-head"><div><h2>Ciclo de mejora continua</h2><div class="hint">Planear → Hacer → Verificar → Actuar</div></div></div><div class="pdca-grid" id="pdcaGrid"></div></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="view">
+      <div class="settings-grid">
+        <!-- Config general (solo admin) -->
+        <div class="panel" id="adminConfigPanel">
+          <div class="panel-head"><h2>Configuración general <span class="admin-badge">ADMIN</span></h2></div>
+          <div class="field"><label>Nombre de la empresa / equipo</label><input id="companyName"></div>
+          <div class="field"><label>Áreas (separadas por coma)</label><textarea id="areasInput"></textarea></div>
+          <button class="btn primary" id="saveSettings">Guardar configuración</button>
+        </div>
+        <!-- Datos personales -->
+        <div class="panel">
+          <div class="panel-head"><h2>Mis datos</h2></div>
+          <p class="muted">Exporta o importa tus actividades personales. El respaldo JSON solo contiene tus tareas.</p>
+          <div class="actions" style="flex-wrap:wrap;gap:8px">
+            <button class="btn" id="exportJson">Respaldar mis datos</button>
+            <button class="btn" id="exportCsv">Exportar CSV</button>
+          </div>
+          <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+          <div class="field"><label>Cambiar mi contraseña</label>
+            <input id="newPassInput" type="password" placeholder="Nueva contraseña (mín. 4 caracteres)">
+          </div>
+          <button class="btn primary" id="changePassBtn">Actualizar contraseña</button>
+        </div>
+      </div>
+
+      <!-- Gestión de usuarios (solo admin) -->
+      <div class="panel" id="userMgmtPanel">
+        <div class="panel-head"><h2>Gestión de usuarios <span class="admin-badge">ADMIN</span></h2><button class="btn sm primary" id="addUserBtn">＋ Agregar usuario</button></div>
+        <div class="user-row header"><span>Usuario</span><span>Nombre</span><span>Rol</span><span>Acciones</span></div>
+        <div id="userList"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- TASK DIALOG -->
+<dialog id="taskDialog">
+  <form id="taskForm">
+    <div class="modal-head"><h2 id="modalTitle">Nueva actividad</h2><button type="button" class="close" onclick="taskDialog.close()">×</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <input type="hidden" id="taskId">
+      <div class="field span2"><label>Actividad / resultado esperado *</label><input id="fTitle" required placeholder="Ej. Conciliar depósitos BBVA"></div>
+      <div class="field"><label>Responsable *</label><select id="fPerson" required></select></div>
+      <div class="field"><label>Área *</label><select id="fArea" required></select></div>
+      <div class="field"><label>Tipo de trabajo</label><select id="fType"><option>Tarea estándar</option><option>Urgencia / incidencia</option><option>Mejora</option></select></div>
+      <div class="field"><label>Origen</label><select id="fOrigin"><option>Plan mensual</option><option>Extraordinaria</option></select></div>
+      <div class="field"><label>Cuadrante Eisenhower</label><select id="fQuadrant"><option value="Q1">Q1 · Hacer</option><option value="Q2" selected>Q2 · Planificar</option><option value="Q3">Q3 · Delegar</option><option value="Q4">Q4 · Posponer</option></select></div>
+      <div class="field"><label>Peso ICC</label><select id="fWeight"><option value="1">1 · Baja</option><option value="2">2 · Media</option><option value="3" selected>3 · Alta</option><option value="5">5 · Crítica</option></select></div>
+      <div class="field"><label>Fecha compromiso *</label><input id="fDue" type="date" required></div>
+      <div class="field"><label>Etapa del flujo</label><select id="fStage"><option>Idea</option><option>Análisis</option><option>En desarrollo</option><option>Revisión de calidad</option><option>Bloqueado</option><option>Listo</option></select></div>
+      <div class="field"><label>Etapa PDCA</label><select id="fPdca"><option value="">No aplica</option><option>Planear</option><option>Hacer</option><option>Verificar</option><option>Actuar</option></select></div>
+      <div class="field span2"><label>Entregable / criterio de terminado</label><textarea id="fDeliverable" placeholder="Describe la evidencia que confirma el cumplimiento"></textarea></div>
+      <div class="field span2"><label>Notas o bloqueo</label><textarea id="fNotes" placeholder="Motivo, quién destraba, desde cuándo y siguiente seguimiento"></textarea></div>
+    </div></div>
+    <div class="modal-foot">
+      <button type="button" class="btn danger" id="deleteTask" style="margin-right:auto;display:none">Eliminar</button>
+      <button type="button" class="btn" onclick="taskDialog.close()">Cancelar</button>
+      <button class="btn primary" type="submit">Guardar actividad</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ADD USER DIALOG -->
+<dialog id="userDialog">
+  <div class="modal-head"><h2>Agregar usuario</h2><button type="button" class="close" onclick="userDialog.close()">×</button></div>
+  <div class="modal-body">
+    <div class="field"><label>Nombre de usuario (login)</label><input id="nuUsername" placeholder="ej. ricardo.compras"></div>
+    <div class="field"><label>Nombre completo</label><input id="nuName" placeholder="ej. Ricardo García"></div>
+    <div class="field"><label>Área</label><select id="nuArea"></select></div>
+    <div class="field"><label>Contraseña inicial</label><input id="nuPass" type="password" placeholder="Mínimo 4 caracteres"></div>
+    <div class="field"><label>Rol</label>
+      <select id="nuRole"><option value="user">Colaborador</option><option value="admin">Administrador</option></select>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn" onclick="userDialog.close()">Cancelar</button>
+    <button class="btn primary" id="saveUserBtn">Crear usuario</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  CONSTANTS & HELPERS
+// ════════════════════════════════════════════════════════════════
+const USERS_KEY   = 'cb_users_v1';
+const SHARED_KEY  = 'cb_shared_v1';   // areas, company
+const DATA_PREFIX = 'cb_data_';       // + username
+const SESSION_KEY = 'cb_session_v1';
+
+const simpleColumns = ['Pendiente','En proceso','Terminada'];
+const flowColumns   = ['Idea','Análisis','En desarrollo','Revisión de calidad','Bloqueado','Listo'];
+const pageInfo = {
+  dashboard:['Panel general','Visión ejecutiva del desempeño del equipo'],
+  kanban:   ['Kanban','Control visual de actividades y responsables'],
+  matrix:   ['Matriz semanal','Clasificación urgente e importante'],
+  meeting:  ['Junta semanal','Agenda, retroalimentación y compromisos'],
+  pdca:     ['PDCA','Seguimiento de mejoras recurrentes'],
+  settings: ['Configuración','Equipo, áreas y datos personales']
+};
+
+const iso    = d => d.toISOString().slice(0,10);
+const today  = () => iso(new Date());
+const addD   = n  => { let d=new Date(); d.setDate(d.getDate()+n); return iso(d); };
+const esc    = (s='') => String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const hashPw = s => btoa(unescape(encodeURIComponent(s+'_cb_salt_2024')));
+
+// ════════════════════════════════════════════════════════════════
+//  USERS & AUTH
+// ════════════════════════════════════════════════════════════════
+function getUsers(){
+  try{ return JSON.parse(localStorage.getItem(USERS_KEY))||[]; }catch{ return []; }
+}
+function saveUsers(u){ localStorage.setItem(USERS_KEY,JSON.stringify(u)); }
+
+function initDefaultUsers(){
+  if(getUsers().length) return;
+  const shared = {
+    company:'Corporativo Burgos · Mejora Continua',
+    areas:['Compras','Recursos Humanos','Almacén','Contabilidad','Marketing','Sistemas'],
+    boardMode:'simple'
+  };
+  localStorage.setItem(SHARED_KEY,JSON.stringify(shared));
+
+  const users = [
+    {username:'wilian',  name:'Wilian Carrillo',   area:'Sistemas',         role:'admin', pw:hashPw('admin2024')},
+    {username:'ricardo', name:'Ricardo',            area:'Compras',          role:'user',  pw:hashPw('compras24')},
+    {username:'randy',   name:'Randy',              area:'Almacén',          role:'user',  pw:hashPw('almacen24')},
+    {username:'ana',     name:'Ana',                area:'Contabilidad',     role:'user',  pw:hashPw('conta2024')},
+    {username:'jaime',   name:'Jaime',              area:'Sistemas',         role:'user',  pw:hashPw('sistemas24')},
+    {username:'marketing',name:'Marketing',         area:'Marketing',        role:'user',  pw:hashPw('mkt2024')},
+  ];
+  saveUsers(users);
+
+  // seed tasks per user
+  const seedTasks = {
+    ricardo:[{id:uuid(),title:'Actualizar listas de precios de proveedores',area:'Compras',type:'Tarea estándar',origin:'Plan mensual',quadrant:'Q2',weight:3,due:addD(2),stage:'En desarrollo',deliverable:'Listas validadas y cargadas en Alpha',notes:'',pdcaStage:'',completedAt:''}],
+    ana:[
+      {id:uuid(),title:'Conciliar diferencias de depósitos BBVA',area:'Contabilidad',type:'Urgencia / incidencia',origin:'Extraordinaria',quadrant:'Q1',weight:5,due:addD(-1),stage:'Bloqueado',deliverable:'Cortes, facturación y depósitos conciliados',notes:'Falta confirmación de sucursal.',pdcaStage:'',completedAt:''},
+      {id:uuid(),title:'Responder incidencia de facturación',area:'Contabilidad',type:'Urgencia / incidencia',origin:'Extraordinaria',quadrant:'Q3',weight:1,due:addD(0),stage:'Listo',deliverable:'Ticket resuelto y usuario notificado',notes:'',pdcaStage:'',completedAt:addD(0)}
+    ],
+    randy:[
+      {id:uuid(),title:'Procedimiento de inventarios rotativos',area:'Almacén',type:'Mejora',origin:'Plan mensual',quadrant:'Q2',weight:3,due:addD(6),stage:'Análisis',deliverable:'Procedimiento aprobado',notes:'',pdcaStage:'Planear',completedAt:''},
+      {id:uuid(),title:'Cerrar inventario semanal CEDIS',area:'Almacén',type:'Tarea estándar',origin:'Plan mensual',quadrant:'Q1',weight:3,due:addD(-2),stage:'Listo',deliverable:'Reporte firmado',notes:'',pdcaStage:'',completedAt:addD(-2)}
+    ],
+    marketing:[{id:uuid(),title:'Publicar campaña comercial del mes',area:'Marketing',type:'Tarea estándar',origin:'Plan mensual',quadrant:'Q2',weight:3,due:addD(1),stage:'Revisión de calidad',deliverable:'Campaña publicada en RRSS',notes:'Pendiente validación.',pdcaStage:'',completedAt:''}],
+    jaime:[{id:uuid(),title:'Configurar nueva unidad de negocio',area:'Sistemas',type:'Urgencia / incidencia',origin:'Extraordinaria',quadrant:'Q1',weight:5,due:addD(3),stage:'En desarrollo',deliverable:'Unidad, almacenes y centros de costo validados',notes:'',pdcaStage:'',completedAt:''}],
+    wilian:[{id:uuid(),title:'Validar indicadores de perfiles de puesto',area:'Recursos Humanos',type:'Mejora',origin:'Plan mensual',quadrant:'Q2',weight:2,due:addD(8),stage:'Idea',deliverable:'Matriz universal aprobada',notes:'',pdcaStage:'Planear',completedAt:''}]
+  };
+  for(const [uname, tasks] of Object.entries(seedTasks)){
+    const us = users.find(u=>u.username===uname);
+    const data = {boardMode:'simple',tasks:tasks.map(t=>({...t,person:us?.name||uname}))};
+    localStorage.setItem(DATA_PREFIX+uname, JSON.stringify(data));
+  }
+}
+
+function uuid(){ return crypto.randomUUID(); }
+
+// ════════════════════════════════════════════════════════════════
+//  SESSION
+// ════════════════════════════════════════════════════════════════
+let currentUser  = null;   // user object
+let userState    = null;   // {boardMode, tasks}
+let sharedConfig = null;   // {company, areas}
+
+function getSession(){
+  try{ return JSON.parse(sessionStorage.getItem(SESSION_KEY)); }catch{ return null; }
+}
+function setSession(u){ sessionStorage.setItem(SESSION_KEY,JSON.stringify(u)); }
+function clearSession(){ sessionStorage.removeItem(SESSION_KEY); }
+
+function loadUserData(username){
+  try{ return JSON.parse(localStorage.getItem(DATA_PREFIX+username))||{boardMode:'simple',tasks:[]}; }
+  catch{ return {boardMode:'simple',tasks:[]}; }
+}
+function saveUserData(){
+  localStorage.setItem(DATA_PREFIX+currentUser.username, JSON.stringify(userState));
+}
+function loadShared(){
+  try{ return JSON.parse(localStorage.getItem(SHARED_KEY))||{company:'Control Operativo',areas:[],boardMode:'simple'}; }
+  catch{ return {company:'Control Operativo',areas:[]}; }
+}
+function saveShared(){ localStorage.setItem(SHARED_KEY,JSON.stringify(sharedConfig)); }
+
+// ════════════════════════════════════════════════════════════════
+//  ALL TASKS (for dashboard — reads every user's data)
+// ════════════════════════════════════════════════════════════════
+function getAllTasks(){
+  const users = getUsers();
+  let all = [];
+  for(const u of users){
+    const d = loadUserData(u.username);
+    all = all.concat((d.tasks||[]).map(t=>({...t,_owner:u.username})));
+  }
+  return all;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  LOGIN LOGIC
+// ════════════════════════════════════════════════════════════════
+initDefaultUsers();
+
+const loginScreen = document.getElementById('loginScreen');
+const appShell    = document.getElementById('appShell');
+
+function tryLogin(){
+  const u = document.getElementById('loginUser').value.trim().toLowerCase();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+  if(!u||!p){ err.textContent='Ingresa usuario y contraseña.'; return; }
+  const users = getUsers();
+  const found = users.find(x=>x.username===u && x.pw===hashPw(p));
+  if(!found){ err.textContent='Usuario o contraseña incorrectos.'; return; }
+  err.textContent='';
+  setSession({username:found.username});
+  startApp(found);
+}
+
+document.getElementById('loginBtn').onclick = tryLogin;
+document.getElementById('loginPass').addEventListener('keydown',e=>{ if(e.key==='Enter') tryLogin(); });
+
+// auto-resume session
+(function(){
+  const sess = getSession();
+  if(sess){
+    const u = getUsers().find(x=>x.username===sess.username);
+    if(u){ startApp(u); return; }
+  }
+})();
+
+// ════════════════════════════════════════════════════════════════
+//  APP BOOT
+// ════════════════════════════════════════════════════════════════
+function startApp(user){
+  currentUser  = user;
+  userState    = loadUserData(user.username);
+  sharedConfig = loadShared();
+  loginScreen.style.display = 'none';
+  appShell.style.display    = 'grid';
+  // UI personalization
+  document.getElementById('userAvatar').textContent      = user.name[0].toUpperCase();
+  document.getElementById('userDisplayName').textContent = user.name;
+  document.getElementById('userRoleLabel').textContent   = user.role==='admin'?'Administrador':'Colaborador';
+  document.getElementById('companyLabel').textContent    = sharedConfig.company;
+  // Admin-only UI
+  const isAdmin = user.role==='admin';
+  document.getElementById('adminConfigPanel').style.display = isAdmin?'':'none';
+  document.getElementById('userMgmtPanel').style.display    = isAdmin?'':'none';
+  renderAll();
+  goView('dashboard');
+}
+
+document.getElementById('logoutBtn').onclick = ()=>{
+  clearSession();
+  appShell.style.display='none';
+  loginScreen.style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  currentUser=null; userState=null;
+};
+
+// ════════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════════════
+function goView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
+  document.getElementById('pageTitle').textContent = pageInfo[id][0];
+  document.getElementById('pageSub').textContent   = pageInfo[id][1];
+  document.getElementById('sidebar').classList.remove('open');
+  if(id==='kanban') renderBoard();
+  if(id==='settings') renderSettings();
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>goView(b.dataset.view));
+document.getElementById('menuBtn').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
+
+// ════════════════════════════════════════════════════════════════
+//  CORE LOGIC
+// ════════════════════════════════════════════════════════════════
+const simpleStatus = t => t.stage==='Listo'?'Terminada':['En desarrollo','Revisión de calidad','Bloqueado'].includes(t.stage)?'En proceso':'Pendiente';
+const isDone  = t => t.stage==='Listo';
+const overdue = t => !isDone(t) && t.due < today();
+const onTime  = t => isDone(t) && t.completedAt && t.completedAt<=t.due;
+function icc(tasks){
+  const el  = tasks.filter(t=>t.due<=today()||isDone(t));
+  const tot = el.reduce((s,t)=>s+Number(t.weight),0);
+  const dn  = el.filter(onTime).reduce((s,t)=>s+Number(t.weight),0);
+  return tot ? Math.round(dn/tot*100) : 100;
+}
+const colorClass = v => v>=85?'good':v>=75?'warn':'bad';
+const monthTasks = tasks => { const m=today().slice(0,7); return tasks.filter(t=>t.due.startsWith(m)); };
+const formatDate = d => !d?'Sin fecha':new Intl.DateTimeFormat('es-MX',{day:'2-digit',month:'short'}).format(new Date(d+'T12:00:00'));
+
+// ════════════════════════════════════════════════════════════════
+//  RENDER ALL
+// ════════════════════════════════════════════════════════════════
+function renderAll(){ populateFilters(); renderDashboard(); renderBoard(); renderMatrix(); renderMeeting(); renderPDCA(); }
+
+// ════════════════════════════════════════════════════════════════
+//  DASHBOARD (uses ALL users' tasks)
+// ════════════════════════════════════════════════════════════════
+function renderDashboard(){
+  const all  = getAllTasks();
+  const mt   = monthTasks(all);
+  const score= icc(mt);
+  const done = mt.filter(isDone);
+  const late = all.filter(overdue);
+  const blk  = all.filter(t=>t.stage==='Bloqueado');
+  const extra= mt.filter(t=>t.origin==='Extraordinaria');
+
+  document.getElementById('kpis').innerHTML = [
+    ['ICC mensual', score+'%', colorClass(score), 'Meta ≥ 85%'],
+    ['Terminadas',  done.length, 'good', mt.length+' actividades del mes'],
+    ['Vencidas',    late.length, late.length?'bad':'good', 'Requieren nueva decisión'],
+    ['Bloqueadas',  blk.length,  blk.length?'warn':'good', 'Necesitan responsable de desbloqueo'],
+    ['Extraordinarias', mt.length?Math.round(extra.length/mt.length*100)+'%':'0%', '', extra.length+' actividades no planeadas']
+  ].map(x=>`<div class="kpi"><div class="label">${x[0]}</div><div class="value ${x[2]}">${x[1]}</div><div class="sub">${x[3]}</div></div>`).join('');
+
+  // Per-person bars (all users)
+  const users = getUsers();
+  document.getElementById('peopleBars').innerHTML = users.map(u=>{
+    const uTasks = mt.filter(t=>t._owner===u.username);
+    const v = icc(uTasks);
+    return `<div><div class="bar-label"><span>${esc(u.name)}</span><strong>${v}%</strong></div><div class="bar"><span style="width:${v}%;background:${v>=85?'var(--green)':v>=75?'var(--amber)':'var(--red)'}"></span></div></div>`;
+  }).join('') || '<div class="empty">Sin responsables registrados.</div>';
+
+  const att = [...all.filter(t=>overdue(t)||t.stage==='Bloqueado')].sort((a,b)=>a.due.localeCompare(b.due)).slice(0,7);
+  document.getElementById('attentionTable').innerHTML = att.length
+    ? `<table><thead><tr><th>Actividad</th><th>Responsable</th><th>Situación</th></tr></thead><tbody>${att.map(t=>`<tr><td>${esc(t.title)}</td><td>${esc(t.person)}</td><td>${t.stage==='Bloqueado'?'<span class="pill amber">Bloqueada</span>':'<span class="pill red">Vencida</span>'}</td></tr>`).join('')}</tbody></table>`
+    : '<div class="empty">No hay actividades vencidas ni bloqueadas.</div>';
+
+  const pct = mt.length ? Math.round(done.length/mt.length*100) : 0;
+  document.getElementById('monthLabel').textContent        = new Intl.DateTimeFormat('es-MX',{month:'long',year:'numeric'}).format(new Date());
+  document.getElementById('monthlyProgressText').textContent = `${done.length} de ${mt.length} terminadas`;
+  document.getElementById('monthlyProgressPct').textContent  = pct+'%';
+  document.getElementById('monthlyProgressBar').style.width  = pct+'%';
+  document.getElementById('monthlyDetail').textContent       = `${mt.filter(t=>!isDone(t)).length} abiertas · ${extra.length} extraordinarias · ${mt.filter(overdue).length} vencidas`;
+
+  const types=['Tarea estándar','Urgencia / incidencia','Mejora'];
+  document.getElementById('typeDistribution').innerHTML = types.map((type,i)=>{
+    const n=mt.filter(t=>t.type===type).length, p=mt.length?Math.round(n/mt.length*100):0;
+    return `<div><div class="bar-label"><span>${type}</span><strong>${n} · ${p}%</strong></div><div class="bar"><span style="width:${p}%;background:${['var(--blue)','var(--red)','var(--purple)'][i]}"></span></div></div>`;
+  }).join('');
+
+  document.getElementById('areaTable').innerHTML = `<table><thead><tr><th>Área</th><th>ICC</th><th>Alerta</th></tr></thead><tbody>${(sharedConfig.areas||[]).map(a=>{
+    const at=mt.filter(t=>t.area===a), v=icc(at), alert=all.filter(t=>t.area===a&&(overdue(t)||t.stage==='Bloqueado')).length;
+    return `<tr><td>${esc(a)}</td><td><strong>${v}%</strong></td><td>${alert?`<span class="pill ${v<75?'red':'amber'}">${alert}</span>`:'<span class="pill green">0</span>'}</td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  KANBAN (uses current user's tasks)
+// ════════════════════════════════════════════════════════════════
+function populateFilters(){
+  const users= getUsers();
+  const names= users.map(u=>u.name);
+  const set=(el,base,arr)=>{ const v=el.value; el.innerHTML=base+arr.map(x=>`<option>${esc(x)}</option>`).join(''); el.value=v; };
+  set(document.getElementById('filterArea'),'<option value="">Todas las áreas</option>',sharedConfig.areas||[]);
+  set(document.getElementById('filterPerson'),'<option value="">Todos los responsables</option>',names);
+  set(document.getElementById('fArea'),'',sharedConfig.areas||[]);
+  set(document.getElementById('fPerson'),'',names);
+  // pre-select current user in form
+  if(currentUser) document.getElementById('fPerson').value = currentUser.name;
+  // populate add-user dialog area
+  if(document.getElementById('nuArea')) set(document.getElementById('nuArea'),'',sharedConfig.areas||[]);
+}
+
+function renderBoard(){
+  const cols = userState.boardMode==='simple'?simpleColumns:flowColumns;
+  document.getElementById('boardHelp').textContent = userState.boardMode==='simple'
+    ? 'La vista individual resume el trabajo en Pendiente, En proceso y Terminada. Arrastra las tarjetas para cambiar su estado.'
+    : 'El flujo completo muestra Idea, Análisis, En desarrollo, Revisión de calidad, Bloqueado y Listo.';
+
+  // In kanban: show ALL tasks but only allow editing own tasks (or admin)
+  const all   = getAllTasks();
+  const fArea = document.getElementById('filterArea').value;
+  const fPer  = document.getElementById('filterPerson').value;
+  const fType = document.getElementById('filterType').value;
+  const fSrch = document.getElementById('searchTask').value.toLowerCase();
+
+  let tasks = all.filter(t=>
+    (!fArea||t.area===fArea) &&
+    (!fPer ||t.person===fPer) &&
+    (!fType||t.type===fType) &&
+    (!fSrch||t.title.toLowerCase().includes(fSrch))
+  );
+
+  document.getElementById('board').innerHTML = cols.map(c=>{
+    const ct = tasks.filter(t=>(userState.boardMode==='simple'?simpleStatus(t):t.stage)===c);
+    return `<section class="column"><div class="col-head"><span>${c}</span><span class="count">${ct.length}</span></div><div class="dropzone" data-column="${c}">${ct.map(taskCard).join('')||'<div class="empty">Sin actividades</div>'}</div></section>`;
+  }).join('');
+  bindDnD();
+}
+
+const typePill = t => t==='Urgencia / incidencia'?'red':t==='Mejora'?'purple':'blue';
+function taskCard(t){
+  const isOwn = t._owner===currentUser.username || currentUser.role==='admin';
+  const drag   = isOwn ? 'draggable="true"' : '';
+  const cursor  = isOwn ? '' : 'style="cursor:default"';
+  const click   = isOwn ? `onclick="openTask('${t.id}','${t._owner}')"` : '';
+  return `<article class="task" ${drag} data-id="${t.id}" data-owner="${t._owner}" ${cursor} ${click}>
+    <div class="task-owner-badge">${esc(t.person)}</div>
+    <div class="tags" style="margin-top:16px">
+      <span class="pill ${typePill(t.type)}">${esc(t.type)}</span>
+      <span class="pill">${t.quadrant}</span>
+      ${t.origin==='Extraordinaria'?'<span class="pill amber">Extra</span>':''}
+      ${!isOwn?'<span class="pill" style="background:#f0f0f0;color:#888">Solo lectura</span>':''}
+    </div>
+    <h3>${esc(t.title)}</h3>
+    <div class="meta"><span>${esc(t.area)}</span><span class="${overdue(t)?'overdue':''}">${overdue(t)?'⚠ ':''}${formatDate(t.due)} · ${t.weight} pts</span></div>
+  </article>`;
+}
+
+function bindDnD(){
+  document.querySelectorAll('.task[draggable="true"]').forEach(x=>{
+    x.ondragstart=e=>{ e.dataTransfer.setData('text/plain',x.dataset.id+'|'+x.dataset.owner); x.classList.add('dragging'); };
+    x.ondragend=()=>x.classList.remove('dragging');
+  });
+  document.querySelectorAll('.dropzone').forEach(z=>{
+    z.ondragover=e=>{ e.preventDefault(); z.classList.add('over'); };
+    z.ondragleave=()=>z.classList.remove('over');
+    z.ondrop=e=>{
+      e.preventDefault(); z.classList.remove('over');
+      const [tid,owner]=e.dataTransfer.getData('text/plain').split('|');
+      if(owner!==currentUser.username && currentUser.role!=='admin') return;
+      const ownerData = loadUserData(owner);
+      const t = ownerData.tasks.find(x=>x.id===tid);
+      if(!t) return;
+      let target=z.dataset.column;
+      if(userState.boardMode==='simple'){
+        if(target==='Pendiente')   t.stage='Idea';
+        if(target==='En proceso')  t.stage=t.stage==='Bloqueado'?'Bloqueado':'En desarrollo';
+        if(target==='Terminada')   t.stage='Listo';
+      } else t.stage=target;
+      t.completedAt = t.stage==='Listo'?(t.completedAt||today()):'';
+      localStorage.setItem(DATA_PREFIX+owner, JSON.stringify(ownerData));
+      if(owner===currentUser.username) userState=ownerData;
+      renderAll(); toast('Estado actualizado');
+    };
+  });
+}
+
+document.querySelectorAll('[data-board]').forEach(b=>b.onclick=()=>{
+  userState.boardMode=b.dataset.board;
+  document.querySelectorAll('[data-board]').forEach(x=>x.classList.toggle('active',x===b));
+  saveUserData(); renderBoard();
+});
+['filterArea','filterPerson','filterType','searchTask'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener(el.tagName==='INPUT'?'input':'change',renderBoard);
+});
+
+// ════════════════════════════════════════════════════════════════
+//  MATRIX (all tasks)
+// ════════════════════════════════════════════════════════════════
+function renderMatrix(){
+  const all = getAllTasks();
+  const qs=[['Q1','Hacer ahora','Urgente + importante','q1'],['Q2','Planificar','Importante + no urgente','q2'],['Q3','Delegar','Urgente + no importante','q3'],['Q4','Posponer o eliminar','No urgente + no importante','q4']];
+  document.getElementById('matrixGrid').innerHTML = qs.map(q=>`<div class="quad ${q[3]}"><h3>${q[0]} · ${q[1]}</h3><p>${q[2]}</p>${all.filter(t=>t.quadrant===q[0]&&!isDone(t)).map(t=>{
+    const isOwn=t._owner===currentUser.username||currentUser.role==='admin';
+    return `<div class="mini-task" ${isOwn?`onclick="openTask('${t.id}','${t._owner}')"`:''}><strong>${esc(t.title)}</strong><span>${esc(t.person)} · ${formatDate(t.due)}</span></div>`;
+  }).join('')||'<div class="empty">Sin temas abiertos</div>'}</div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  MEETING (all tasks)
+// ════════════════════════════════════════════════════════════════
+const agendaData=[
+  ['00–05','Resultados de la semana','Mostrar ICC, vencidos, bloqueados y extraordinarios; todavía sin explicar causas.'],
+  ['05–10','Compromisos anteriores','Revisar únicamente terminados, reprogramados, incumplidos y bloqueados.'],
+  ['10–20','Desviaciones + Wilson','Clarificar, valorar, expresar inquietudes y sugerir una acción concreta.'],
+  ['20–25','Bloqueos','Definir qué bloquea, quién destraba y cuándo. No resolver temas extensos en la junta.'],
+  ['25–30','Avance mensual','Comparar avance real contra el esperado y detectar compromisos en riesgo.'],
+  ['30–37','Nuevos temas + Eisenhower','Clasificar Q1–Q4 antes de asignar. Preguntar qué pasa si no se hace esta semana.'],
+  ['37–40','Capacidad','Decidir: agregar, sustituir, reprogramar o delegar.'],
+  ['40–45','Cierre','Confirmar responsable, fecha, peso y entregable de cada compromiso.']
+];
+function renderMeeting(){
+  const all=getAllTasks(), mt=monthTasks(all), score=icc(mt), late=all.filter(overdue), blk=all.filter(t=>t.stage==='Bloqueado'), extra=mt.filter(t=>t.origin==='Extraordinaria');
+  document.getElementById('meetingStats').innerHTML=[['ICC',score+'%'],['Vencidas',late.length],['Bloqueadas',blk.length],['Extraordinarias',extra.length]].map(x=>`<div><small>${x[0]}</small><b>${x[1]}</b></div>`).join('');
+  document.getElementById('agenda').innerHTML=agendaData.map(x=>`<div class="agenda-time">${x[0]}</div><div class="agenda-item"><strong>${x[1]}</strong><span>${x[2]}</span></div>`).join('');
+  const open=all.filter(t=>!isDone(t)).sort((a,b)=>a.due.localeCompare(b.due)).slice(0,8);
+  document.getElementById('commitments').innerHTML=open.length
+    ?`<table><thead><tr><th>Actividad</th><th>Responsable</th><th>Fecha</th></tr></thead><tbody>${open.map(t=>`<tr><td>${esc(t.title)}</td><td>${esc(t.person)}</td><td class="${overdue(t)?'overdue':''}">${formatDate(t.due)}</td></tr>`).join('')}</tbody></table>`
+    :'<div class="empty">No hay compromisos abiertos.</div>';
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PDCA (all tasks)
+// ════════════════════════════════════════════════════════════════
+function renderPDCA(){
+  const all=getAllTasks();
+  const stages=[['Planear','Definir causa, objetivo y plan'],['Hacer','Ejecutar prueba o cambio'],['Verificar','Medir contra el objetivo'],['Actuar','Estandarizar o ajustar']];
+  document.getElementById('pdcaGrid').innerHTML=stages.map(s=>`<div class="pdca-stage"><h3>${s[0]}</h3><div class="hint">${s[1]}</div><div class="mt8">${all.filter(t=>t.type==='Mejora'&&t.pdcaStage===s[0]).map(t=>`<div class="pdca-card"><strong>${esc(t.title)}</strong><br><span class="muted">${esc(t.person)} · ${formatDate(t.due)}</span></div>`).join('')||'<div class="empty">Sin mejoras</div>'}</div></div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════════════════════════════
+function renderSettings(){
+  if(currentUser.role==='admin'){
+    document.getElementById('companyName').value = sharedConfig.company||'';
+    document.getElementById('areasInput').value  = (sharedConfig.areas||[]).join(', ');
+    renderUserList();
+  }
+}
+document.getElementById('saveSettings').onclick=()=>{
+  if(currentUser.role!=='admin') return;
+  sharedConfig.company = document.getElementById('companyName').value.trim()||'Control Operativo';
+  sharedConfig.areas   = document.getElementById('areasInput').value.split(',').map(x=>x.trim()).filter(Boolean);
+  saveShared();
+  document.getElementById('companyLabel').textContent = sharedConfig.company;
+  renderAll(); toast('Configuración guardada');
+};
+
+// Change own password
+document.getElementById('changePassBtn').onclick=()=>{
+  const np = document.getElementById('newPassInput').value;
+  if(np.length<4){ toast('La contraseña debe tener al menos 4 caracteres'); return; }
+  const users = getUsers();
+  const me = users.find(u=>u.username===currentUser.username);
+  if(me){ me.pw=hashPw(np); saveUsers(users); toast('Contraseña actualizada'); document.getElementById('newPassInput').value=''; }
+};
+
+// User list (admin)
+function renderUserList(){
+  const users=getUsers();
+  document.getElementById('userList').innerHTML=users.map(u=>`<div class="user-row">
+    <span>${esc(u.username)}</span>
+    <span>${esc(u.name)}</span>
+    <span><span class="pill ${u.role==='admin'?'amber':'blue'}">${u.role==='admin'?'Admin':'Colaborador'}</span></span>
+    <span>${u.username!==currentUser.username?`<button class="btn sm danger" onclick="removeUser('${u.username}')">Eliminar</button>`:'<span class="muted">Yo</span>'}</span>
+  </div>`).join('');
+}
+
+window.removeUser=function(username){
+  if(!confirm(`¿Eliminar al usuario "${username}"? Se borrarán también sus actividades.`)) return;
+  const users=getUsers().filter(u=>u.username!==username);
+  saveUsers(users);
+  localStorage.removeItem(DATA_PREFIX+username);
+  renderUserList(); toast('Usuario eliminado');
+};
+
+// Add user dialog
+document.getElementById('addUserBtn').onclick=()=>{
+  populateFilters();
+  document.getElementById('nuUsername').value='';
+  document.getElementById('nuName').value='';
+  document.getElementById('nuPass').value='';
+  document.getElementById('nuRole').value='user';
+  document.getElementById('userDialog').showModal();
+};
+document.getElementById('saveUserBtn').onclick=()=>{
+  const un=document.getElementById('nuUsername').value.trim().toLowerCase();
+  const nm=document.getElementById('nuName').value.trim();
+  const ar=document.getElementById('nuArea').value;
+  const pw=document.getElementById('nuPass').value;
+  const rl=document.getElementById('nuRole').value;
+  if(!un||!nm||!pw||pw.length<4){ toast('Completa todos los campos (contraseña mín. 4 caracteres)'); return; }
+  const users=getUsers();
+  if(users.find(u=>u.username===un)){ toast('Ese nombre de usuario ya existe'); return; }
+  users.push({username:un,name:nm,area:ar,role:rl,pw:hashPw(pw)});
+  saveUsers(users);
+  localStorage.setItem(DATA_PREFIX+un,JSON.stringify({boardMode:'simple',tasks:[]}));
+  document.getElementById('userDialog').close();
+  renderUserList(); toast('Usuario creado correctamente');
+};
+
+// ════════════════════════════════════════════════════════════════
+//  TASK FORM
+// ════════════════════════════════════════════════════════════════
+function openTask(id, ownerUsername){
+  ownerUsername = ownerUsername || currentUser.username;
+  // Only admin or owner can edit
+  if(ownerUsername!==currentUser.username && currentUser.role!=='admin'){ toast('No tienes permiso para editar esta actividad'); return; }
+  const ownerData = loadUserData(ownerUsername);
+  const t = id ? ownerData.tasks.find(x=>x.id===id) : null;
+  document.getElementById('modalTitle').textContent = t?'Editar actividad':'Nueva actividad';
+  document.getElementById('taskId').value    = t?.id||'';
+  document.getElementById('taskId').dataset.owner = ownerUsername;
+  document.getElementById('fTitle').value    = t?.title||'';
+  document.getElementById('fPerson').value   = t?.person||currentUser.name;
+  document.getElementById('fArea').value     = t?.area||sharedConfig.areas?.[0]||'';
+  document.getElementById('fType').value     = t?.type||'Tarea estándar';
+  document.getElementById('fOrigin').value   = t?.origin||'Plan mensual';
+  document.getElementById('fQuadrant').value = t?.quadrant||'Q2';
+  document.getElementById('fWeight').value   = t?.weight||3;
+  document.getElementById('fDue').value      = t?.due||addD(5);
+  document.getElementById('fStage').value    = t?.stage||'Idea';
+  document.getElementById('fPdca').value     = t?.pdcaStage||'';
+  document.getElementById('fDeliverable').value = t?.deliverable||'';
+  document.getElementById('fNotes').value    = t?.notes||'';
+  // Delete btn: admin always, owner always; hidden when new task
+  const delBtn = document.getElementById('deleteTask');
+  delBtn.style.display = t ? 'block' : 'none';
+  taskDialog.showModal();
+}
+
+document.getElementById('newBtn').onclick = ()=>openTask(null, currentUser.username);
+
+document.getElementById('taskForm').onsubmit=e=>{
+  e.preventDefault();
+  const ownerUsername = document.getElementById('taskId').dataset.owner||currentUser.username;
+  const ownerData = loadUserData(ownerUsername);
+  const old = ownerData.tasks.find(t=>t.id===document.getElementById('taskId').value);
+
+  // If new task and non-admin, force person to current user
+  const selectedPerson = document.getElementById('fPerson').value;
+  const person = (!old && currentUser.role!=='admin') ? currentUser.name : selectedPerson;
+
+  const obj={
+    id:document.getElementById('taskId').value||uuid(),
+    title:document.getElementById('fTitle').value.trim(),
+    person,
+    area:document.getElementById('fArea').value,
+    type:document.getElementById('fType').value,
+    origin:document.getElementById('fOrigin').value,
+    quadrant:document.getElementById('fQuadrant').value,
+    weight:Number(document.getElementById('fWeight').value),
+    due:document.getElementById('fDue').value,
+    stage:document.getElementById('fStage').value,
+    pdcaStage:document.getElementById('fPdca').value,
+    deliverable:document.getElementById('fDeliverable').value.trim(),
+    notes:document.getElementById('fNotes').value.trim(),
+    completedAt:document.getElementById('fStage').value==='Listo'?(old?.completedAt||today()):''
+  };
+  if(old) Object.assign(old,obj);
+  else ownerData.tasks.push(obj);
+  localStorage.setItem(DATA_PREFIX+ownerUsername,JSON.stringify(ownerData));
+  if(ownerUsername===currentUser.username) userState=ownerData;
+  taskDialog.close(); renderAll(); toast(old?'Actividad actualizada':'Actividad creada');
+};
+
+document.getElementById('deleteTask').onclick=()=>{
+  const ownerUsername=document.getElementById('taskId').dataset.owner||currentUser.username;
+  if(ownerUsername!==currentUser.username && currentUser.role!=='admin'){ toast('Sin permiso para eliminar'); return; }
+  if(!confirm('¿Eliminar esta actividad?')) return;
+  const ownerData=loadUserData(ownerUsername);
+  ownerData.tasks=ownerData.tasks.filter(t=>t.id!==document.getElementById('taskId').value);
+  localStorage.setItem(DATA_PREFIX+ownerUsername,JSON.stringify(ownerData));
+  if(ownerUsername===currentUser.username) userState=ownerData;
+  taskDialog.close(); renderAll(); toast('Actividad eliminada');
+};
+
+// ════════════════════════════════════════════════════════════════
+//  EXPORT / COPY
+// ════════════════════════════════════════════════════════════════
+function download(name,text,type){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; a.click(); URL.revokeObjectURL(a.href); }
+
+document.getElementById('exportBtn').onclick=
+document.getElementById('exportJson').onclick=()=>{ download('Respaldo_MisTareas_'+today()+'.json',JSON.stringify(userState,null,2),'application/json'); };
+
+document.getElementById('exportCsv').onclick=()=>{
+  const keys=['Actividad','Responsable','Área','Tipo','Origen','Cuadrante','Peso','Fecha','Etapa','Entregable','Notas','Finalizada'];
+  const rows=(userState.tasks||[]).map(t=>[t.title,t.person,t.area,t.type,t.origin,t.quadrant,t.weight,t.due,t.stage,t.deliverable,t.notes,t.completedAt]);
+  const q=v=>'"'+String(v??'').replaceAll('"','""')+'"';
+  download('Actividades_'+currentUser.username+'_'+today()+'.csv','\ufeff'+[keys,...rows].map(r=>r.map(q).join(',')).join('\n'),'text/csv;charset=utf-8');
+};
+
+document.getElementById('copyMeeting').onclick=async()=>{
+  const all=getAllTasks(), open=all.filter(t=>!isDone(t)).sort((a,b)=>a.due.localeCompare(b.due));
+  const mt=monthTasks(all);
+  const text=`JUNTA SEMANAL — ${new Date().toLocaleDateString('es-MX')}\nICC: ${icc(mt)}%\nVencidas: ${all.filter(overdue).length}\nBloqueadas: ${all.filter(t=>t.stage==='Bloqueado').length}\n\nCOMPROMISOS\n`+open.map(t=>`- ${t.title} | ${t.person} | ${t.due} | ${t.weight} pts | ${t.quadrant}`).join('\n');
+  await navigator.clipboard.writeText(text); toast('Minuta copiada');
+};
+
+// ════════════════════════════════════════════════════════════════
+//  TOAST & KEYBOARD
+// ════════════════════════════════════════════════════════════════
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(window.__t); window.__t=setTimeout(()=>el.classList.remove('show'),2400); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(taskDialog.open) taskDialog.close(); if(document.getElementById('userDialog').open) document.getElementById('userDialog').close(); } });
+</script>
+</body>
+</html>
